@@ -8,15 +8,24 @@
 import time
 import speedtest
 import plotly
+import argparse
 
 import plotly.plotly as py
 import plotly.graph_objs as go
 import plotly.figure_factory as FF
-# import numpy as np
+import numpy as np
 import pandas as pd
-
 from datetime import datetime
-MEASUREPERIOD_SECONDS = 2
+
+parser = argparse.ArgumentParser(description='Monitor Dsl uplaod- and downloadspeed as well as ping.')
+parser.add_argument('--period',type=int, help='Pass the measurement period', action="store", default = False) 
+argv = parser.parse_args()
+try:
+    if(argv.period):
+        MEASUREPERIOD_SECONDS = argv.period
+except NameError:
+    MEASUREPERIOD_SECONDS = 60
+    
 FULLDAY_SECONDS = 86400 
 
 def logMeasurement(bandwidthDown, bandwidthUp, Ping):
@@ -30,6 +39,8 @@ def logMeasurement(bandwidthDown, bandwidthUp, Ping):
     else:
         with open('errorfile.csv', 'a') as errorfile:        
             errorfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
+        with open('logfile.csv', 'a') as logfile:
+            logfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
 
 def triggerMeasurement():
     """
@@ -80,6 +91,7 @@ def driver():
     """
     Manages measurement, logging and output
     """
+    print(MEASUREPERIOD_SECONDS)
     start = time.time()
     while True:
         time.sleep(MEASUREPERIOD_SECONDS)
@@ -87,8 +99,8 @@ def driver():
         bandwidthDown, bandwidthUp, Ping = BittoMbitConverter(bandwidthDown, bandwidthUp, Ping)
         logMeasurement(bandwidthDown, bandwidthUp, Ping)
         # Print once each day
-        # if((time.time() - start) > 60):
-            # printMeasurement()
+        if((time.time() - start) > 60):
+            printMeasurement()
          
 with open('logfile.csv', 'w') as logfile:
     logfile.write('Time,                   Download (MBit),    Upload (MBit),    Ping (ms)   \n')
