@@ -1,9 +1,17 @@
+#TODO: User Input (relaxed and busy testing)
+#TODO: New document to store horrific results 
+#TODO: Store with current time
+#TODO: Generate nice output
+
+
+
 import time
 import speedtest
 import plotly
 import argparse
 
 import plotly.plotly as py
+plotly.tools.set_credentials_file(username='humanica', api_key='y1Be2hS6Op9kplAdIwQI')
 import plotly.graph_objs as go
 import plotly.figure_factory as FF
 import numpy as np
@@ -28,12 +36,14 @@ def logMeasurement(bandwidthDown, bandwidthUp, Ping):
     date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if((bandwidthDown > 100) and (bandwidthUp > 15) and (Ping < 25)):
         with open('logfile.csv', 'a') as logfile:
-            logfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
+        #    logfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
+            logfile.write('{},{:.0f},{:.0f},{:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
     else:
         with open('errorfile.csv', 'a') as errorfile:        
             errorfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
         with open('logfile.csv', 'a') as logfile:
-            logfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
+        #   logfile.write('{},    {:.0f},                {:.0f},               {:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
+            logfile.write('{},{:.0f},{:.0f},{:3.2f}\n'.format(date, bandwidthDown, bandwidthUp, Ping))
 
 def triggerMeasurement():
     """
@@ -52,25 +62,21 @@ def printMeasurement():
     Prints all gathered data stored in cvs file
     """
     # Import data from cvs
-    df = pd.read_csv('test.csv')
+    df = pd.read_csv('logfile.csv')
     logfileTable = FF.create_table(df.head())
-    # py.iplot(sample_data_table, filename='sample-data-table')
-    py.iplot(logfileTable, filename='logfileTable')
+    py.plot(logfileTable, filename='logfileTable')
 
-    # Store data in differen elements
     trace1 = go.Scatter(
-                        time=df['AAPL_x'], downloadBandwidth=df['AAPL_y'], # Data
-                        mode='lines', name='downloadBandwidth' # Additional options
-                        )
+                        x=df['Time'], y=df['Download'], # Data
+                        mode='lines', name='Download')
    # trace2 = go.Scatter(x=df['Time'], y=df['uploadBandwidth'], mode='lines', name='uploadBandwidth' )
    # trace3 = go.Scatter(x=df['Time'], y=df['Ping'], mode='lines', name='Ping')
 
-    layout = go.Layout(title='Simple Plot from csv data',
-                   plot_bgcolor='rgb(230, 230,230)')
+    layout = go.Layout(title='Simple Plot from csv data', plot_bgcolor='rgb(230, 230,230)')
 
     # actual printing
     fig = go.Figure(data=[trace1], layout=layout)
-    py.iplot(fig, filename='V-DSL Stats')
+    py.plot(fig, filename='V-DSL Stats')
     
 def BittoMbitConverter(bandwidthDown, bandwidthUp, Ping):
     """
@@ -92,11 +98,12 @@ def driver():
         bandwidthDown, bandwidthUp, Ping = BittoMbitConverter(bandwidthDown, bandwidthUp, Ping)
         logMeasurement(bandwidthDown, bandwidthUp, Ping)
         # Print once each day
-        if((time.time() - start) > 60):
+        if((time.time() - start) > 30 * 60):
             printMeasurement()
          
 with open('logfile.csv', 'w') as logfile:
-    logfile.write('Time,                   Download (MBit),    Upload (MBit),    Ping (ms)   \n')
+    #logfile.write('Time,                   Download (MBit),    Upload (MBit),    Ping (ms)   \n')
+    logfile.write('Time,Download,Upload,Ping\n')
 with open('errorfile.csv', 'w') as errorfile:
     errorfile.write('Time,                   Download (MBit),    Upload (MBit),    Ping (ms)   \n')
 # Start execution
