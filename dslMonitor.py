@@ -1,10 +1,3 @@
-#TODO: User Input (relaxed and busy testing)
-#TODO: New document to store horrific results 
-#TODO: Store with current time
-#TODO: Generate nice output
-
-
-
 import time
 import speedtest
 import plotly
@@ -14,17 +7,15 @@ import plotly.plotly as py
 plotly.tools.set_credentials_file(username='humanica', api_key='y1Be2hS6Op9kplAdIwQI')
 import plotly.graph_objs as go
 import plotly.figure_factory as FF
-import numpy as np
 import pandas as pd
 from datetime import datetime
 
 parser = argparse.ArgumentParser(description='Monitor Dsl uplaod- and downloadspeed as well as ping.')
 parser.add_argument('--period',type=int, help='Pass the measurement period', action="store", default = False) 
 argv = parser.parse_args()
-try:
-    if(argv.period):
-        MEASUREPERIOD_SECONDS = argv.period
-except NameError:
+if argv.period:
+    MEASUREPERIOD_SECONDS = argv.period
+else:
     MEASUREPERIOD_SECONDS = 60
     
 FULLDAY_SECONDS = 86400 
@@ -66,16 +57,16 @@ def printMeasurement():
     logfileTable = FF.create_table(df.head())
     py.plot(logfileTable, filename='logfileTable')
 
-    trace1 = go.Scatter(
+    downloadTrace = go.Scatter(
                         x=df['Time'], y=df['Download'], # Data
                         mode='lines', name='Download')
-   # trace2 = go.Scatter(x=df['Time'], y=df['uploadBandwidth'], mode='lines', name='uploadBandwidth' )
-   # trace3 = go.Scatter(x=df['Time'], y=df['Ping'], mode='lines', name='Ping')
+    uploadTrace = go.Scatter(x=df['Time'], y=df['Upload'], mode='lines', name='Upload' )
+    pingTrace = go.Scatter(x=df['Time'], y=df['Ping'], mode='lines', name='Ping')
 
     layout = go.Layout(title='Simple Plot from csv data', plot_bgcolor='rgb(230, 230,230)')
 
     # actual printing
-    fig = go.Figure(data=[trace1], layout=layout)
+    fig = go.Figure(data=[downloadTrace, uploadTrace, pingTrace], layout=layout)
     py.plot(fig, filename='V-DSL Stats')
     
 def BittoMbitConverter(bandwidthDown, bandwidthUp, Ping):
