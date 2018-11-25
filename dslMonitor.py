@@ -1,10 +1,3 @@
-#TODO: User Input (relaxed and busy testing)
-#TODO: New document to store horrific results 
-#TODO: Store with current time
-#TODO: Generate nice output
-
-
-
 import time
 import speedtest
 import plotly
